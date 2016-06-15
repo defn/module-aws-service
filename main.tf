@@ -1,5 +1,4 @@
-provider "aws" {
-}
+provider "aws" { }
 
 resource "terraform_remote_state" "global" {
   backend = "s3"
@@ -45,4 +44,8 @@ resource "aws_route_table_association" "rt_assoc" {
   count = "${var.az_count}"
   subnet_id = "${element(aws_subnet.subnet.*.id, count.index)}"
   route_table_id = "${aws_route_table.rt.id}"
+}
+
+output "subnet_ids" {
+  value = "${join(" ", aws_subnet.subnet.*.id)}"
 }
