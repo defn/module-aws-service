@@ -17,10 +17,10 @@ resource "terraform_remote_state" "env" {
 }
 
 resource "aws_subnet" "subnet" {
-  vpc_id = "${terraform_remote_state.env.output.vpc_id}"
+  vpc_id = "${terraform_remote_state.env.vpc_id}"
 
   count = "${var.az_count}"
-  availability_zone = "${element(split(" ",terraform_remote_state.global.output.az_names), count.index)}"
+  availability_zone = "${element(split(" ",terraform_remote_state.global.az_names), count.index)}"
   cidr_block = "${element(split(" ", var.cidr_blocks), count.index)}"
 
   tags {
@@ -33,7 +33,7 @@ resource "aws_subnet" "subnet" {
 }
 
 resource "aws_route_table" "rt" {
-  vpc_id = "${terraform_remote_state.env.output.vpc_id}"
+  vpc_id = "${terraform_remote_state.env.vpc_id}"
 
   tags {
     "Provisioner" = "tf"
