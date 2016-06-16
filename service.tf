@@ -1,2 +1,2 @@
-variable "cidr_blocks" {}
+variable "cidr_blocks" { default = [] }
 variable "az_count" {}
