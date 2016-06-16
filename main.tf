@@ -16,10 +16,13 @@ data "terraform_remote_state" "env" {
   }
 }
 
+variable "az_count" { }
+
 resource "aws_subnet" "subnet" {
+  count = "${var.az_count}"
+
   vpc_id = "${data.terraform_remote_state.env.vpc_id}"
 
-  count = "${var.az_count}"
   availability_zone = "${element(split(" ",data.terraform_remote_state.global.az_names), count.index)}"
   cidr_block = "${element(split(" ", var.cidr_blocks), count.index)}"
 
@@ -42,6 +45,7 @@ resource "aws_route_table" "rt" {
 
 resource "aws_route_table_association" "rt_assoc" {
   count = "${var.az_count}"
+
   subnet_id = "${element(aws_subnet.subnet.*.id, count.index)}"
   route_table_id = "${aws_route_table.rt.id}"
 }
