@@ -87,7 +87,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "iam_profile" {
-  name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
+  name = "${aws_iam_role.iam_role.name}"
   roles = ["${aws_iam_role.iam_role.name}"]
 }
 
@@ -101,8 +101,8 @@ resource "aws_launch_configuration" "lc" {
 
   instance_type = "${var.instance_type}"
   image_id = "${var.image_id}"
-  iam_instance_profile = "${var.context_org}-${var.context_env}-${var.app_service_name}"
-  key_name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
+  iam_instance_profile = "${aws_iam_instance_profile.iam_profile.name}"
+  key_name = "${aws_key_pair.key_pair.key_name}"
 
   security_groups = [ "${var.security_groups}", "${aws_security_group.sg.id}" ]
 
@@ -199,14 +199,14 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 resource "aws_sns_topic" "asg_topic" {
-  name = "${var.context_org}-${var.context_env}-${var.app_service_name}-asg-topic"
+  name = "${aws_autoscaling_group.asg.name}-topic"
 }
 
 resource "aws_autoscaling_notification" "asg_notice" {
   depends_on = [ "aws_autoscaling_group.asg" ]
 
   group_names = [
-    "${var.context_org}-${var.context_env}-${var.app_service_name}-asg"
+    "${aws_autoscaling_group.asg.name}"
   ]
   notifications  = [
     "autoscaling:EC2_INSTANCE_LAUNCH",
