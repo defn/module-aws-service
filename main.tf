@@ -1,6 +1,7 @@
 provider "aws" { }
 
 variable "az_count" {}
+variable "app_name" {}
 variable "service_name" {}
 
 resource "aws_subnet" "subnet" {
@@ -37,4 +38,15 @@ resource "aws_route_table_association" "rt_assoc" {
 
 output "subnet_ids" {
   value = [ "${aws_subnet.subnet.*.id}" ]
+}
+
+resource "aws_security_group" "sg" {
+  name = "${var.app_name}-${var.service_name}"
+  description = "Service ${var.app_name}-${var.service_name}"
+
+  vpc_id = "${data.terraform_remote_state.env.vpc_id}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
