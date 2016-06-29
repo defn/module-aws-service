@@ -41,8 +41,8 @@ output "subnet_ids" {
 }
 
 resource "aws_security_group" "sg" {
-  name = "${var.app_name}-${var.service_name}"
-  description = "Service ${var.app_name}-${var.service_name}"
+  name = "${var.app_service_name}"
+  description = "Service ${var.app_service_name}"
 
   vpc_id = "${data.terraform_remote_state.env.vpc_id}"
 
