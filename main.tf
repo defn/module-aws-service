@@ -8,14 +8,6 @@ data "terraform_remote_state" "global" {
   }
 }
 
-data "terraform_remote_state" "env" {
-  backend = "s3"
-  config {
-    bucket = "${var.bucket_remote_state}"
-    key = "${var.bucket_remote_state}/env-${var.context_org}-${var.context_env}.tfstate"
-  }
-}
-
 variable "az_count" {}
 variable "service_name" {}
 
