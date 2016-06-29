@@ -58,15 +58,15 @@ resource "aws_security_group" "sg" {
   }
 }
 
-variable "image_id" { default = "ami-11286c71" }
+variable "elb_internal" { default = "true" }
 
-variable "internal" { default = "true" }
-variable "max" { default = 0 }
-variable "min" { default = 0 }
+variable "asg_max" { default = 0 }
+variable "asg_min" { default = 0 }
 
-variable "instance_type" { default = "m3.medium" }
-variable "root" { default = "100"}
-variable "security_groups" { default = [] }
+variable "lc_image_id" { default = "ami-11286c71" }
+variable "lc_instance_type" { default = "m3.medium" }
+variable "lc_root_volume_size" { default = "100"}
+variable "lc_security_groups" { default = [] }
 
 resource "aws_iam_role" "iam_role" {
   	name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
@@ -99,16 +99,16 @@ resource "aws_key_pair" "key_pair" {
 resource "aws_launch_configuration" "lc" {
   name_prefix = "${var.context_org}-${var.context_env}-${var.app_service_name}-lc-"
 
-  instance_type = "${var.instance_type}"
-  image_id = "${var.image_id}"
+  instance_type = "${var.lc_instance_type}"
+  image_id = "${var.lc_image_id}"
   iam_instance_profile = "${aws_iam_instance_profile.iam_profile.name}"
   key_name = "${aws_key_pair.key_pair.key_name}"
 
-  security_groups = [ "${var.security_groups}", "${aws_security_group.sg.id}" ]
+  security_groups = [ "${var.lc_security_groups}", "${aws_security_group.sg.id}" ]
 
   root_block_device {
     volume_type = "gp2"
-    volume_size = "${var.root}"
+    volume_size = "${var.lc_root_volume_size}"
   }
 
   ephemeral_block_device {
@@ -136,7 +136,7 @@ resource "aws_launch_configuration" "lc" {
 resource "aws_elb" "lb" {
   name = "${var.context_org}-${var.context_env}-${var.app_service_name}-elb"
 
-  internal = "${var.internal}"
+  internal = "${var.elb_internal}"
 
   listener {
     instance_port = 80
@@ -172,8 +172,8 @@ resource "aws_autoscaling_group" "asg" {
 
   load_balancers = [ "${aws_elb.lb.name}" ]
 
-  max_size = "${var.max}"
-  min_size = "${var.min}"
+  max_size = "${var.asg_max}"
+  min_size = "${var.asg_min}"
   termination_policies = [ "OldestInstance" ]
   
   tag {
