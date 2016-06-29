@@ -16,7 +16,8 @@ data "terraform_remote_state" "env" {
   }
 }
 
-variable "az_count" { }
+variable "az_count" {}
+variable "service_name" {}
 
 resource "aws_subnet" "subnet" {
   count = "${var.az_count}"
