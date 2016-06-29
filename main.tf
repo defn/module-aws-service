@@ -69,7 +69,7 @@ variable "root" { default = "100"}
 variable "security_groups" { default = [] }
 
 resource "aws_iam_role" "iam_role" {
-  	name = "${var.app_service_name}"
+  	name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
     path = "/"
     assume_role_policy = <<EOF
 {
@@ -87,22 +87,22 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "iam_profile" {
-  name = "${var.app_service_name}"
+  name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
   roles = ["${aws_iam_role.iam_role.name}"]
 }
 
 resource "aws_key_pair" "key_pair" {
-  key_name = "${var.app_service_name}"
+  key_name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQColj57cnyn+68sfzRFU/XrzeJ20mfIkRE+tfdV7uE3IxHmDil7u/XLumkX0//R1hVyIyFgm75e4w6hd6R91sMADFE+Ye7Z0ncZXLYZWF1lMFqp+sAupr8a+1xIsYDFSZRRAa7KwdorfM8hWA3gTIk2p5b7Dn/vovtBJdSOoQPJ0TLDxhIK98/JctAWBvct6S3E68/74Go3qumM7o3npLSjjdlVDp/1Qa60Mkljh8YEKL2CcCtba0DPrpkQ1vJDaZOMEV52SzdyK54XjvvqVH8uQXiBkFpn+V6WcrTWHcCwB1TCPfq0WG2SUKPG1uPNxmMj/pBvaUqt8G2IcyqnSbGx ${var.app_service_name}"
 }
 
 resource "aws_launch_configuration" "lc" {
-  name_prefix = "${var.app_service_name}-lc-"
+  name_prefix = "${var.context_org}-${var.context_env}-${var.app_service_name}-lc-"
 
   instance_type = "${var.instance_type}"
   image_id = "${var.image_id}"
-  iam_instance_profile = "${var.app_service_name}"
-  key_name = "${var.app_service_name}"
+  iam_instance_profile = "${var.context_org}-${var.context_env}-${var.app_service_name}"
+  key_name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
 
   security_groups = [ "${var.security_groups}", "${aws_security_group.sg.id}" ]
 
@@ -134,7 +134,7 @@ resource "aws_launch_configuration" "lc" {
 }
 
 resource "aws_elb" "lb" {
-  name = "${var.app_service_name}-elb"
+  name = "${var.context_org}-${var.context_env}-${var.app_service_name}-elb"
 
   internal = "${var.internal}"
 
@@ -164,7 +164,7 @@ resource "aws_elb" "lb" {
 }
 
 resource "aws_autoscaling_group" "asg" {
-  name = "${var.app_service_name}-asg"
+  name = "${var.context_org}-${var.context_env}-${var.app_service_name}-asg"
   launch_configuration = "${aws_launch_configuration.lc.name}"
 
   availability_zones = [ "${data.terraform_remote_state.global.az_names}" ]
@@ -199,14 +199,14 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 resource "aws_sns_topic" "asg_topic" {
-  name = "${var.app_service_name}-asg-topic"
+  name = "${var.context_org}-${var.context_env}-${var.app_service_name}-asg-topic"
 }
 
 resource "aws_autoscaling_notification" "asg_notice" {
   depends_on = [ "aws_autoscaling_group.asg" ]
 
   group_names = [
-    "${var.app_service_name}-asg"
+    "${var.context_org}-${var.context_env}-${var.app_service_name}-asg"
   ]
   notifications  = [
     "autoscaling:EC2_INSTANCE_LAUNCH",
