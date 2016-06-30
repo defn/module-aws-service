@@ -1,6 +1,5 @@
 provider "aws" { }
 
-variable "az_count" {}
 variable "app_name" {}
 variable "service_name" {}
 variable "app_service_name" {}
