@@ -216,3 +216,9 @@ resource "aws_autoscaling_notification" "asg_notice" {
   topic_arn = "${aws_sns_topic.asg_topic.arn}"
 }
 
+resource "aws_sns_topic_subscription" "asg_sub" {
+  topic_arn = "${aws_sns_topic.asg_topic.arn}"
+  protocol = "sqs"
+  endpoint = "${data.terraform_remote_state.env.asg_arn}"
+}
+
