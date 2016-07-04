@@ -173,9 +173,13 @@ resource "aws_elb" "lb" {
 resource "aws_route53_record" "elb" {
   zone_id = "${data.terraform_remote_state.env.zone_id}"
   name = "${var.app_service_name}"
-  type = "ALIAS"
-  ttl = 60
-  records = [ "${aws_elb.lb.dns_name}" ]
+  type = "A"
+
+  alias {
+    name = "${aws_elb.lb.dns_name}"
+    zone_id = "${aws_elb.lb.zone_id}"
+    evaluate_target_health = false
+  }
 }
 
 output "elb_dns_name" {
@@ -188,6 +192,10 @@ output "service_dns_name" {
 
 output "zone_id" {
   value = "${data.terraform_remote_state.env.zone_id}"
+}
+
+output "elb_zone_id" {
+  value = "${aws_elb.lb.zone_id}"
 }
 
 resource "aws_autoscaling_group" "asg" {
