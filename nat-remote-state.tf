@@ -1,1 +1,0 @@
-../env-xxx/nat-remote-state.tf
