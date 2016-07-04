@@ -64,7 +64,7 @@ resource "aws_security_group" "sg" {
   }
 
   tags {
-    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}-${element(data.terraform_remote_state.global.az_names,count.index)}"
+    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}"
     "App" = "${var.app_name}"
 		"Service" = "${var.app_service_name}"
     "Provisioner" = "tf"
