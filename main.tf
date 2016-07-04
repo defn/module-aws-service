@@ -13,6 +13,7 @@ resource "aws_subnet" "subnet" {
   cidr_block = "${element(var.cidr_blocks, count.index)}"
 
   tags {
+    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}-${element(data.terraform_remote_state.global.az_names,count.index)}"
     "Provisioner" = "tf"
   }
 
