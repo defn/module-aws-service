@@ -174,6 +174,7 @@ resource "aws_route53_record" "elb" {
   zone_id = "${data.terraform_remote_state.env.zone_id}"
   name = "${var.app_service_name}"
   type = "ALIAS"
+  ttl = 60
   records = [ "${aws_elb.lb.dns_name}" ]
 }
 
