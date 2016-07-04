@@ -177,6 +177,18 @@ resource "aws_route53_record" "elb" {
   records = [ "${aws_elb.lb.dns_name}" ]
 }
 
+output "elb_dns_name" {
+  value = "${aws_elb.lb.dns_name}"
+}
+
+output "service_dns_name" {
+  value = "${aws_route53_record.elb.fqdn}"
+}
+
+output "zone_id" {
+  value = "${data.terraform_remote_state.env.zone_id}"
+}
+
 resource "aws_autoscaling_group" "asg" {
   name = "${var.context_org}-${var.context_env}-${var.app_service_name}-asg"
   launch_configuration = "${aws_launch_configuration.lc.name}"
