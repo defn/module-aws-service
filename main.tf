@@ -29,6 +29,12 @@ resource "aws_route_table" "rt" {
   }
 }
 
+resource "aws_route" "nat" {
+  route_table_id = "${aws_route_table.rt.id}"
+  destination_cidr_block ="0.0.0.0/0"
+  nat_gateway_id = "${element(data.terraform_remote_state.nat.nat_ids,count.index)}"
+}
+
 resource "aws_route_table_association" "rt_assoc" {
   count = "${var.az_count}"
 
