@@ -25,22 +25,28 @@ resource "aws_route_table" "rt" {
   vpc_id = "${data.terraform_remote_state.env.vpc_id}"
 
   tags {
-    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}"
+    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}-${element(data.terraform_remote_state.global.az_names,count.index)}"
     "Provisioner" = "tf"
   }
+
+  count = "${var.az_count}"
 }
 
 resource "aws_route" "nat" {
-  route_table_id = "${aws_route_table.rt.id}"
+  route_table_id = "${element(aws_route_table.rt.*.id,count.index)}"
   destination_cidr_block ="0.0.0.0/0"
   nat_gateway_id = "${element(data.terraform_remote_state.nat.nat_ids,count.index)}"
+
+  count = "${var.az_count}"
 }
 
 resource "aws_route_table_association" "rt_assoc" {
   count = "${var.az_count}"
 
   subnet_id = "${element(aws_subnet.subnet.*.id, count.index)}"
-  route_table_id = "${aws_route_table.rt.id}"
+  route_table_id = "${element(aws_route_table.rt.*.id,count.index)}"
+
+  count = "${var.az_count}"
 }
 
 output "subnet_ids" {
