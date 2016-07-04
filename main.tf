@@ -25,6 +25,7 @@ resource "aws_route_table" "rt" {
   vpc_id = "${data.terraform_remote_state.env.vpc_id}"
 
   tags {
+    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}"
     "Provisioner" = "tf"
   }
 }
