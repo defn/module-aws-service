@@ -159,13 +159,6 @@ resource "aws_elb" "lb" {
     lb_protocol = "http"
   }
 
-  listener {
-    instance_port = 443
-    instance_protocol = "tcp"
-    lb_port = 443
-    lb_protocol = "tcp"
-  }
-
   cross_zone_load_balancing = true
 
   subnets = [ "${aws_subnet.subnet.*.id}" ]
@@ -175,6 +168,13 @@ resource "aws_elb" "lb" {
 		"Service" = "${var.app_service_name}"
     "Provisioner" = "tf"
   }
+}
+
+resource "aws_route53_record" "elb" {
+  zone_id = "${data.terraform_remote_state.env.zone_id}"
+  name = "${var.app_service_name}"
+  type = "ALIAS"
+  records = [ "${aws_elb.lb.dns_name}" ]
 }
 
 resource "aws_autoscaling_group" "asg" {
