@@ -157,6 +157,10 @@ resource "aws_launch_configuration" "lc" {
     device_name = "/dev/sde"
     virtual_name = "ephemeral3"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_elb" "lb" {
