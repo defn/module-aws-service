@@ -5,12 +5,27 @@ variable "service_name" {}
 variable "app_service_name" {}
 
 resource "aws_subnet" "subnet" {
-  count = "${var.az_count}"
+  count = "${var.nat_count}"
 
   vpc_id = "${data.terraform_remote_state.env.vpc_id}"
 
   availability_zone = "${element(data.terraform_remote_state.global.az_names,count.index)}"
   cidr_block = "${element(var.cidr_blocks, count.index)}"
+
+  tags {
+    "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}-${element(data.terraform_remote_state.global.az_names,count.index)}"
+    "Provisioner" = "tf"
+  }
+}
+
+resource "aws_subnet" "pubnet" {
+  count = "${var.igw_count}"
+
+  vpc_id = "${data.terraform_remote_state.env.vpc_id}"
+
+  availability_zone = "${element(data.terraform_remote_state.global.az_names,count.index)}"
+  cidr_block = "${element(var.cidr_blocks, count.index)}"
+  map_public_ip_on_launch = true
 
   tags {
     "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}-${element(data.terraform_remote_state.global.az_names,count.index)}"
@@ -48,14 +63,14 @@ resource "aws_route" "igw" {
 resource "aws_route_table_association" "rt_assoc" {
   count = "${var.az_count}"
 
-  subnet_id = "${element(aws_subnet.subnet.*.id, count.index)}"
+  subnet_id = "${element(concat(aws_subnet.subnet.*.id,aws_subnet.pubnet.*.id), count.index)}"
   route_table_id = "${element(aws_route_table.rt.*.id,count.index)}"
 
   count = "${var.az_count}"
 }
 
 output "subnet_ids" {
-  value = [ "${aws_subnet.subnet.*.id}" ]
+  value = [ "${concat(aws_subnet.subnet.*.id,aws_subnet.pubnet.*.id)}" ]
 }
 
 resource "aws_security_group" "sg" {
@@ -177,7 +192,7 @@ resource "aws_elb" "lb" {
 
   cross_zone_load_balancing = true
 
-  subnets = [ "${aws_subnet.subnet.*.id}" ]
+  subnets = [ "${concat(aws_subnet.subnet.*.id,aws_subnet.pubnet.*.id)}" ]
 
   tags {
     "App" = "${var.app_name}"
@@ -223,7 +238,7 @@ resource "aws_autoscaling_group" "asg" {
   launch_configuration = "${aws_launch_configuration.lc.name}"
 
   availability_zones = [ "${data.terraform_remote_state.global.az_names}" ]
-  vpc_zone_identifier = [ "${aws_subnet.subnet.*.id}" ]
+  vpc_zone_identifier = [ "${concat(aws_subnet.subnet.*.id,aws_subnet.pubnet.*.id)}" ]
 
   load_balancers = [ "${aws_elb.lb.name}" ]
 
