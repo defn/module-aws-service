@@ -34,7 +34,15 @@ resource "aws_route" "nat" {
   destination_cidr_block ="0.0.0.0/0"
   nat_gateway_id = "${element(data.terraform_remote_state.nat.nat_ids,count.index)}"
 
-  count = "${var.az_count}"
+  count = "${var.nat_count}"
+}
+
+resource "aws_route" "igw" {
+  route_table_id = "${element(aws_route_table.rt.*.id,count.index)}"
+  destination_cidr_block ="0.0.0.0/0"
+  gateway_id = "${data.terraform_remote_state.env.igw}"
+
+  count = "${var.igw_count}"
 }
 
 resource "aws_route_table_association" "rt_assoc" {
