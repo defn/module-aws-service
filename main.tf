@@ -158,6 +158,10 @@ resource "aws_elb" "lb" {
   }
 }
 
+output "instances" {
+  value = [ "${aws_elb.lb.instances}" ]
+}
+
 resource "aws_route53_record" "elb" {
   zone_id = "${data.terraform_remote_state.env.zone_id}"
   name = "${var.app_service_name}"
