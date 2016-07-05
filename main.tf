@@ -85,7 +85,7 @@ variable "lc_image_id" { default = "ami-11286c71" }
 variable "lc_instance_type" { default = "m3.medium" }
 variable "lc_root_volume_size" { default = "100"}
 variable "lc_security_groups" { default = [] }
-variable "lc_script" { default = "aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-headers-virtual" }
+variable "lc_script" { default = "aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-virtual linux-generic" }
 
 resource "aws_iam_role" "iam_role" {
   	name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
