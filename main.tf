@@ -85,6 +85,7 @@ variable "lc_image_id" { default = "ami-11286c71" }
 variable "lc_instance_type" { default = "m3.medium" }
 variable "lc_root_volume_size" { default = "100"}
 variable "lc_security_groups" { default = [] }
+variable "lc_script" { default = "aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-headers-generic" }
 
 resource "aws_iam_role" "iam_role" {
   	name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
@@ -114,6 +115,16 @@ resource "aws_key_pair" "key_pair" {
   public_key = "${data.terraform_remote_state.global.public_key}"
 }
 
+resource "template_cloudinit_config" "config" {
+  gzip = true
+  base64_encode = true
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = "${var.lc_script}"
+  }
+}
+
 resource "aws_launch_configuration" "lc" {
   name_prefix = "${var.context_org}-${var.context_env}-${var.app_service_name}-lc-"
 
@@ -121,6 +132,7 @@ resource "aws_launch_configuration" "lc" {
   image_id = "${var.lc_image_id}"
   iam_instance_profile = "${aws_iam_instance_profile.iam_profile.name}"
   key_name = "${aws_key_pair.key_pair.key_name}"
+  user_data = "${template_cloudinit_config.config.rendered}"
 
   security_groups = [ "${var.lc_security_groups}", "${aws_security_group.sg.id}" ]
 
