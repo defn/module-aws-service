@@ -103,7 +103,7 @@ resource "aws_iam_instance_profile" "iam_profile" {
 
 resource "aws_key_pair" "key_pair" {
   key_name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQColj57cnyn+68sfzRFU/XrzeJ20mfIkRE+tfdV7uE3IxHmDil7u/XLumkX0//R1hVyIyFgm75e4w6hd6R91sMADFE+Ye7Z0ncZXLYZWF1lMFqp+sAupr8a+1xIsYDFSZRRAa7KwdorfM8hWA3gTIk2p5b7Dn/vovtBJdSOoQPJ0TLDxhIK98/JctAWBvct6S3E68/74Go3qumM7o3npLSjjdlVDp/1Qa60Mkljh8YEKL2CcCtba0DPrpkQ1vJDaZOMEV52SzdyK54XjvvqVH8uQXiBkFpn+V6WcrTWHcCwB1TCPfq0WG2SUKPG1uPNxmMj/pBvaUqt8G2IcyqnSbGx ${var.app_service_name}"
+  public_key = "${data.terraform_remote_state.global.public_key}"
 }
 
 resource "aws_launch_configuration" "lc" {
