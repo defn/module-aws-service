@@ -16,10 +16,6 @@ resource "aws_subnet" "subnet" {
     "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}-${element(data.terraform_remote_state.global.az_names,count.index)}"
     "Provisioner" = "tf"
   }
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 resource "aws_route_table" "rt" {
@@ -59,10 +55,6 @@ resource "aws_security_group" "sg" {
   description = "Service ${var.app_service_name}"
 
   vpc_id = "${data.terraform_remote_state.env.vpc_id}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
 
   tags {
     "Name" = "${var.context_org}-${var.context_env}-${var.app_service_name}"
@@ -140,10 +132,6 @@ resource "aws_launch_configuration" "lc" {
   ephemeral_block_device {
     device_name = "/dev/sde"
     virtual_name = "ephemeral3"
-  }
-
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
