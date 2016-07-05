@@ -64,6 +64,10 @@ resource "aws_security_group" "sg" {
   }
 }
 
+output "sg_id" {
+  value = "${aws_security_group.id}"
+}
+
 variable "elb_internal" { default = "true" }
 
 variable "asg_max" { default = 0 }
