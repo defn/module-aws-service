@@ -134,18 +134,8 @@ resource "template_cloudinit_config" "config" {
   base64_encode = false
 
   part {
-    content_type = "text/part-handler"
-    content = "#cloud-config\n\npackage_upgrade: true\n"
-  }
-
-  part {
-    content_type = "text/part-handler"
-    content = "#cloud-config\n\nbootcmd:\n - aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-generic\n"
-  }
-
-  part {
-    content_type = "text/part-handler"
-    content = "#cloud-config\n\nbootcmd:\n - reboot\n"
+    content_type = "text/cloud-config"
+    content = "#cloud-config\npackage_upgrade: true\npackages: [ntp, curl, unzip, git, perl, ruby, language-pack-en, nfs-common, build-essential, dkms, lvm2, xfsprogs, xfsdump, bridge-utils, linux-generic]\nruncmd: [ reboot ]\n"
   }
 
   lifecycle {
