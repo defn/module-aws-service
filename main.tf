@@ -140,12 +140,16 @@ resource "template_cloudinit_config" "config" {
 
   part {
     content_type = "text/part-handler"
-    content = "#cloud-config\n\nbootcmd:\n - aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-virtual linux-generic\n"
+    content = "#cloud-config\n\nbootcmd:\n - aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-generic\n"
   }
 
   part {
     content_type = "text/part-handler"
     content = "#cloud-config\n\nbootcmd:\n - reboot\n"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -183,7 +187,7 @@ resource "aws_launch_configuration" "lc" {
   }
 
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 }
 
