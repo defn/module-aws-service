@@ -100,7 +100,6 @@ variable "lc_image_id" { default = "ami-11286c71" }
 variable "lc_instance_type" { default = "m3.medium" }
 variable "lc_root_volume_size" { default = "100"}
 variable "lc_security_groups" { default = [] }
-variable "lc_script" { default = "aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-virtual linux-generic" }
 
 resource "aws_iam_role" "iam_role" {
   	name = "${var.context_org}-${var.context_env}-${var.app_service_name}"
@@ -131,12 +130,22 @@ resource "aws_key_pair" "key_pair" {
 }
 
 resource "template_cloudinit_config" "config" {
-  gzip = true
-  base64_encode = true
+  gzip = false
+  base64_encode = false
 
   part {
-    content_type = "text/x-shellscript"
-    content      = "${var.lc_script}"
+    content_type = "text/part-handler"
+    content = "#cloud-config\n\npackage_upgrade: true\n"
+  }
+
+  part {
+    content_type = "text/part-handler"
+    content = "#cloud-config\n\nbootcmd:\n - aptitude install -y ntp curl unzip git perl ruby language-pack-en nfs-common build-essential dkms lvm2 xfsprogs xfsdump bridge-utils linux-virtual linux-generic\n"
+  }
+
+  part {
+    content_type = "text/part-handler"
+    content = "#cloud-config\n\nbootcmd:\n - reboot\n"
   }
 }
 
@@ -174,7 +183,7 @@ resource "aws_launch_configuration" "lc" {
   }
 
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 }
 
