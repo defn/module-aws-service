@@ -129,17 +129,13 @@ resource "aws_key_pair" "key_pair" {
   public_key = "${data.terraform_remote_state.global.public_key}"
 }
 
-resource "template_cloudinit_config" "config" {
-  gzip = false
-  base64_encode = false
+data "template_cloudinit_config" "config" {
+  gzip = true
+  base64_encode = true
 
   part {
     content_type = "text/cloud-config"
     content = "#cloud-config\npackage_upgrade: true\npackages: [ntp, curl, unzip, git, perl, ruby, language-pack-en, nfs-common, build-essential, dkms, lvm2, xfsprogs, xfsdump, bridge-utils, linux-generic]\nruncmd: [ reboot ]\n"
-  }
-
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
@@ -150,7 +146,7 @@ resource "aws_launch_configuration" "lc" {
   image_id = "${var.lc_image_id}"
   iam_instance_profile = "${aws_iam_instance_profile.iam_profile.name}"
   key_name = "${aws_key_pair.key_pair.key_name}"
-  user_data = "${template_cloudinit_config.config.rendered}"
+  user_data = "$date.template_cloudinit_config.config.rendered}"
 
   security_groups = [ "${var.lc_security_groups}", "${aws_security_group.sg.id}" ]
 
